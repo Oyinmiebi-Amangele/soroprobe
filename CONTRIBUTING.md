@@ -49,6 +49,12 @@ with no internet. The suite replays responses recorded from the public testnet
 into `internal/stellar/stellartest/testdata`. If you need new network data, add
 it to the recorder rather than reaching out from a test.
 
+For example, run the full suite without configuring an RPC endpoint:
+
+```bash
+go test ./...
+```
+
 **SoroProbe is read-only.** It simulates and inspects. Pull requests that submit
 transactions, deploy contracts, or perform restorations are out of scope — that
 boundary is what makes the tool safe to point at mainnet and safe to run in CI.
@@ -75,10 +81,23 @@ internal/probe    simulate / inspect / check orchestration
 internal/api      chi HTTP handlers mirroring the CLI
 ```
 
+For example, a CLI option flows through the command package into shared probe
+logic, while the HTTP handler stays in its own package:
+
+```text
+cmd/soroprobe/  ->  internal/probe/  <-  internal/api/
+```
+
 The CLI and the API both render the same result structs from `probe`. Adding a
 field there surfaces it in both; please do not add a field to only one.
 
 ## Common contributions
+
+For a focused check while working on a ScVal change, run:
+
+```bash
+go test ./internal/scval
+```
 
 ### Adding an ScVal type
 
@@ -106,6 +125,12 @@ Encoders live in a registry keyed by type name.
 
 5. Add the type to the `argHelp` table in `cmd/soroprobe/commands.go` and to the
    README's argument table.
+
+For example, a round-trip test row for the existing `u32` argument looks like:
+
+```go
+{"u32", "u32:42", xdr.ScValTypeScvU32, uint32(42)},
+```
 
 Nothing outside `internal/scval` needs to change.
 
